@@ -1,0 +1,6 @@
+To Do:
+- Work on -a
+- Work on -l and -a working at the same time
+- Fix the time formatting
+- Commenting the code
+- Fixing the line spacing
