@@ -1,6 +1,6 @@
 
 ls: myls.c
-	gcc -Wall -pedantic -o ls myls.c
+	gcc -Wall -pedantic -o myls myls.c
 
 .PHONY: clean
 clean:
