@@ -65,6 +65,27 @@ int main(int argc, char *argv[]) {
 			Dir_Length += 1;
 		}
 
+		if ((Dir_Length == (argc - 1))) { // if the number of arguments is the amount of directories (besides the ls command itself), that means there are no option arguments
+						  // so we know that we are dealing with only the regular ls command on a given number directories
+			for (int i = 0; i < Dir_Length; i++) {
+				DIR *directory;
+				struct dirent *dir_element;
+				strncpy(current_dir, Directories[i], sizeof(current_dir));
+
+				if ((directory = opendir(current_dir)) == NULL) {
+					perror("Could not open directory");
+				}
+				else {
+					while ((dir_element = readdir(directory)) != NULL) {
+						if (dir_element -> d_name[0] != '.') {
+							printf("%s     ", dir_element -> d_name);
+						}
+						
+					}
+					printf("\n");
+				}
+			}
+		}
 
 
 		while ((opt = getopt(argc, argv, "la:")) != -1) {
@@ -90,6 +111,7 @@ int main(int argc, char *argv[]) {
 					for (int i = 0; i < Dir_Length; i++) {
 						//DIR *directory;
 						//struct dirent *dir_element;
+						//printf("Iteration: %d\n", i);
 						struct passwd *username_access;
 						struct passwd *group_access;
 						struct tm *stattime;
@@ -109,6 +131,8 @@ int main(int argc, char *argv[]) {
 							while ((dir_element = readdir(directory)) != NULL) {
 								char *filename = dir_element -> d_name;
 								stat(filename, buffer);
+
+								//printf("Filename: %s\n", filename);
 
 								username_access = getpwuid(buffer->st_uid);
 								if (username_access == NULL) {
@@ -145,6 +169,7 @@ int main(int argc, char *argv[]) {
 								}
 							}
 						}
+						free(buffer);
 					}
 
 
