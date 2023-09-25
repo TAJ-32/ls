@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <pwd.h>
 #include <time.h>
+#include <stdbool.h>
 
 int main(int argc, char *argv[]) {
 
@@ -42,14 +43,27 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	
 	int opt;
+	bool multiple_dir = false;
+
+	char **Directories = calloc(argc, sizeof(char*));
+	
+	for (int i = 0; i < argc; i++) {
+		Directories[i] = argv[i];
+		printf("%s, \n", Directories[i]);
+	}
+	
 
 	while ((opt = getopt(argc, argv, "la:")) != -1) {
 		DIR *directory;
 		struct dirent *dir_element;
 
 		switch (opt) {
+
+
 			case 'a':
+				l = true;
 				//DIR *directory;
 				//struct dirent *dir_element;
        				if ((directory = opendir(current_dir)) == NULL) {
@@ -62,8 +76,8 @@ int main(int argc, char *argv[]) {
 					}
 				}
 
-			case 'l': ;
-				  
+			case 'l': 
+				a = true 
 				//DIR *directory;
 				//struct dirent *dir_element;
 				struct passwd *username_access;
@@ -118,7 +132,8 @@ int main(int argc, char *argv[]) {
 							username_access->pw_name, group_access->pw_name, 
 							buffer->st_size, timebuf, filename);
 						}
-											}
+											} 
+							
 				}
 			/*		
 			case 'a': ;
