@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 						}
 					}
 
-				case 'l': ;
+				case 'l':
 					
 					for (int i = 0; i < Dir_Length; i++) {
 						//DIR *directory;
