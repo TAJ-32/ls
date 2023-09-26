@@ -1,4 +1,4 @@
-#include <stdio.h>
+#nclude <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <sys/types.h>
@@ -15,6 +15,8 @@ int main(int argc, char *argv[]) {
 	*/
 
 	char current_dir[256];
+
+
 	//ibm.com
 	if (getcwd(current_dir, sizeof(current_dir)) == NULL) {
 		perror("getcwd() error");
@@ -62,22 +64,21 @@ int main(int argc, char *argv[]) {
 		switch (opt) {
 
 
-			case 'a':
-				l = true;
-				//DIR *directory;
-				//struct dirent *dir_element;
-       				if ((directory = opendir(current_dir)) == NULL) {
-					perror("Could not open directory");
-				}
-				else {
-					while ((dir_element = readdir(directory)) != NULL) {
+				case 'a':
+					
+					//DIR *directory;
+					//struct dirent *dir_element;
+					if ((directory = opendir(current_dir)) == NULL) {
+						perror("Could not open directory");
+					}
+					else {
+						while ((dir_element = readdir(directory)) != NULL) {
 						printf("%s	\n", dir_element -> d_name);
 				
 					}
 				}
 
-			case 'l': 
-				a = true 
+			case 'l':  
 				//DIR *directory;
 				//struct dirent *dir_element;
 				struct passwd *username_access;
