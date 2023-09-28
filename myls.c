@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 		else {
 			while ((dir_element = readdir(directory)) != NULL) {
 				if (dir_element -> d_name[0] != '.') {
-					printf("%s	\n", dir_element -> d_name);
+					printf("%s	", dir_element -> d_name);
 				}
 			}
 			printf("\n");
@@ -75,9 +75,10 @@ int main(int argc, char *argv[]) {
 				else {
 					while ((dir_element = readdir(directory)) != NULL) {
 						if (dir_element -> d_name[0] != '.') {
-							printf("%s	\n", dir_element -> d_name);
+							printf("%s	", dir_element -> d_name);
 						}
 					}
+					printf("\n");
 				}
 			}
 		}
@@ -88,12 +89,12 @@ int main(int argc, char *argv[]) {
 			Dir_Length += 1;
 		}
 
-		for (int i = 0; i < Dir_Length; i++) {
-			printf("Directories: %s \n", Directories[i]);
-		}
+		//for (int i = 0; i < Dir_Length; i++) {
+		//	printf("Directories: %s \n", Directories[i]);
+		//}
 
 
-		while ((opt = getopt(argc, argv, "la:")) != -1) {
+		while ((opt = getopt(argc, argv, "la")) != -1) {
 			DIR *directory;
 			struct dirent *dir_element;
 
@@ -109,9 +110,9 @@ int main(int argc, char *argv[]) {
 					}
 					else {
 						while ((dir_element = readdir(directory)) != NULL) {
-						printf("%s	\n", dir_element -> d_name);
-				
+							printf("%s	", dir_element -> d_name);
 						}
+						printf("\n");
 					}
 
 				case 'l':
