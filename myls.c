@@ -73,7 +73,13 @@ int main(int argc, char *argv[]) {
 					perror("Could not open directory");
 				}
 				else {
+
+					if (Dir_Length > 1) {
+						printf("%s: \n", current_dir);
+					}
+
 					while ((dir_element = readdir(directory)) != NULL) {
+
 						if (dir_element -> d_name[0] != '.') {
 							printf("%s	", dir_element -> d_name);
 						}
@@ -102,21 +108,29 @@ int main(int argc, char *argv[]) {
 
 
 				case 'a':
-					
-					//DIR *directory;
-					//struct dirent *dir_element;
-					if ((directory = opendir(current_dir)) == NULL) {
-						perror("Could not open directory");
-					}
-					else {
-						while ((dir_element = readdir(directory)) != NULL) {
-							printf("%s	", dir_element -> d_name);
+					for (int i = 0; i < Dir_Length; i++) {
+						//DIR *directory;
+						//struct dirent *dir_element;
+						
+						strncpy(current_dir, Directories[i], sizeof(current_dir));
+
+						if ((directory = opendir(current_dir)) == NULL) {
+							perror("Could not open directory");
 						}
-						printf("\n");
-					}
+						else {
+							if (Dir_Length > 1) {
+								printf("%s: \n", current_dir);
+							}
+
+							while ((dir_element = readdir(directory)) != NULL) {
+								printf("%s	", dir_element -> d_name);
+							}
+							printf("\n");
+						}
+					}	
+
 
 				case 'l':
-				       	printf("HELLO \n");
 					for (int i = 0; i < Dir_Length; i++) {
 						//DIR *directory;
 						//struct dirent *dir_element;
@@ -134,7 +148,10 @@ int main(int argc, char *argv[]) {
 							perror("Could not open directory");
 						}
 						else {
-							
+							if (Dir_Length > 1) {
+								printf("%s: \n", current_dir);
+							}
+
 
 							while ((dir_element = readdir(directory)) != NULL) {
 								char *filename = dir_element -> d_name;
