@@ -12,13 +12,14 @@
 int main(int argc, char *argv[]) {
 
         /*
-	*First step: identify arguments. If none, simply open file contents 
-	*/
+	String to hold name of the current directory, which shouldn't be longer than 256 characters 
+	 
+	 */
 
 	char current_dir[256];
 
 
-	//ibm.com
+	
 	if (getcwd(current_dir, sizeof(current_dir)) == NULL) {
 		perror("getcwd() error");
 	}
@@ -26,7 +27,7 @@ int main(int argc, char *argv[]) {
 		//current_dir = current_dir;
 	}
 
-	//printf("FILE: %s\n", current_dir);
+	//Condition if we run ./myls with no arguments
 	
 	if (argc == 1) {
 		DIR *directory;
@@ -36,6 +37,7 @@ int main(int argc, char *argv[]) {
 		}
 		else {
 			while ((dir_element = readdir(directory)) != NULL) {
+				//Condition does not allow hidden directories to be included in the directories printed
 				if (dir_element -> d_name[0] != '.') {
 					printf("%s	", dir_element -> d_name);
 				}
@@ -43,11 +45,12 @@ int main(int argc, char *argv[]) {
 			printf("\n");
 		}
 	}
+	//Condition if ./myls has other arugments
 	else {
 		int opt;
 		char *Directories[argc];
 		int Dir_Length = 0;
-		
+	//For loop to get all of the directories listed in the arguments 
 		for (int i = 1; i < argc; i++) {
 
 			if (argv[i][0] != '-') {
@@ -58,9 +61,9 @@ int main(int argc, char *argv[]) {
 		}
 
 		
-		
+		//Condition if ./myls is ran with no option arguments
 		if (Dir_Length == (argc - 1)) {
-			//printf("NO OPTIONS\n");
+		//Does the myls command Dir_length times for each directories in the array Directories[]
 			for (int i = 0; i < Dir_Length; i++) {
 				DIR *directory;
 				struct dirent *dir_element;
@@ -73,7 +76,7 @@ int main(int argc, char *argv[]) {
 					perror("Could not open directory");
 				}
 				else {
-
+					//Condition if there is more than one directory to specify the each directories name
 					if (Dir_Length > 1) {
 						printf("%s: \n", current_dir);
 					}
@@ -89,7 +92,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-
+		//Condition if myls is ran with no file arguments but has option arugments, puts currentdir inside Directories[]
 		if ((Dir_Length == 0)) {
 			Directories[0] = current_dir;
 			Dir_Length += 1;
@@ -99,13 +102,12 @@ int main(int argc, char *argv[]) {
 		//	printf("Directories: %s \n", Directories[i]);
 		//}
 
-
+		//Lists which option arugments are available 'l' and 'a'
 		while ((opt = getopt(argc, argv, "la")) != -1) {
 			DIR *directory;
 			struct dirent *dir_element;
-
+		//Seperates the procedure for each option arugment 
 			switch (opt) {
-
 
 				case 'a':
 					for (int i = 0; i < Dir_Length; i++) {
@@ -170,7 +172,7 @@ int main(int argc, char *argv[]) {
 								else {}
 
 								stattime = localtime(&buffer->st_ctime);
-
+							//Lists the directory permissions
 								strftime(timebuf, 80, "%c", stattime);
 								if (filename[0] != '.') {
 									printf((S_ISDIR(buffer->st_mode)) ? "d" : "-");
