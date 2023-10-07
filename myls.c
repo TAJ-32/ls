@@ -49,21 +49,40 @@ int main(int argc, char *argv[]) {
 	else {
 		int opt;
 		char *Directories[argc];
+		char *files[argc];
 		int Dir_Length = 0;
+		int files_length = 0;
+		struct stat statbuf;
 	//For loop to get all of the directories listed in the arguments 
 		for (int i = 1; i < argc; i++) {
 
 			if (argv[i][0] != '-') {
-				Directories[Dir_Length] = argv[i];
-				//printf("%s \n", Directories[Dir_Length]);
-				Dir_Length++;
+				if (stat(argv[i], &statbuf) == 0) {
+					if (S_ISDIR(statbuf.st_mode)) {
+						Directories[Dir_Length] = argv[i];
+						//printf("%s \n", Directories[Dir_Length]);
+						Dir_Length++;
+					}
+					else {
+						files[files_length] = argv[i];
+						files_length++;
+					}
+				}
 			}
 		}
 
 		
+
+		
 		//Condition if ./myls is ran with no option arguments
-		if (Dir_Length == (argc - 1)) {
+		if ((Dir_Length + files_length) == (argc - 1)) {
 		//Does the myls command Dir_length times for each directories in the array Directories[]
+		//
+			for (int i = 0; i < files_length; i++) {
+				printf("%s	", files[i]);
+			}
+			printf("\n");
+
 			for (int i = 0; i < Dir_Length; i++) {
 				DIR *directory;
 				struct dirent *dir_element;
@@ -77,7 +96,7 @@ int main(int argc, char *argv[]) {
 				}
 				else {
 					//Condition if there is more than one directory to specify the each directories name
-					if (Dir_Length > 1) {
+					if (Dir_Length > 1 || files_length > 0) {
 						printf("%s: \n", current_dir);
 					}
 
@@ -133,6 +152,57 @@ int main(int argc, char *argv[]) {
 
 
 				case 'l':
+					
+					for (int i = 0; i < files_length; i++) {
+						FILE *file;
+						struct passwd *username_access;
+						struct passwd *group_access;
+						struct tm *stattime;
+						char timebuf[80];
+
+						struct stat *buffer = malloc(sizeof(struct stat));
+
+						char *filename = dir_element -> d_name;
+						stat(filename, buffer);
+
+						username_access = getpwuid(buffer->st_uid);
+						if (username_access == NULL) {
+							perror("getpwuid");
+						}
+						else {}
+
+						group_access = getpwuid(buffer->st_gid);
+						if (group_access == NULL) {
+							perror("getpwuid");
+						}
+						else {}
+
+						stattime = localtime(&buffer->st_ctime);
+					//Lists the directory permissions
+						strftime(timebuf, 80, "%c", stattime);
+						if (filename[0] != '.') {
+							printf((S_ISDIR(buffer->st_mode)) ? "d" : "-");
+							printf((S_IRUSR & (buffer->st_mode)) ? "r" : "-");
+							printf((S_IWUSR & (buffer->st_mode)) ? "w" : "-");
+							printf((S_IXUSR & (buffer->st_mode)) ? "x" : "-");
+							printf((S_IRGRP & (buffer->st_mode)) ? "r" : "-");
+							printf((S_IWGRP & (buffer->st_mode)) ? "w" : "-");
+							printf((S_IXGRP & (buffer->st_mode)) ? "x" : "-");
+							printf((S_IROTH & (buffer->st_mode)) ? "r" : "-");
+							printf((S_IWOTH & (buffer->st_mode)) ? "w" : "-");
+							printf((S_IXOTH & (buffer->st_mode)) ? "x" : "-");
+
+
+							printf("	%lu	%s	%s	%jd	%s	%s\n", 
+							buffer->st_nlink,
+							username_access->pw_name, group_access->pw_name, 
+							buffer->st_size, timebuf, filename);
+						}
+
+
+					}
+					
+
 					for (int i = 0; i < Dir_Length; i++) {
 						//DIR *directory;
 						//struct dirent *dir_element;
@@ -150,7 +220,7 @@ int main(int argc, char *argv[]) {
 							perror("Could not open directory");
 						}
 						else {
-							if (Dir_Length > 1) {
+							if (Dir_Length > 1 && files_length > 0) {
 								printf("%s: \n", current_dir);
 							}
 
