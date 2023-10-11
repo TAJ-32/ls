@@ -69,12 +69,11 @@ int main(int argc, char *argv[]) {
 				a = 1;
 
 			case 'l':
-				l = 1;
+				l = 1;			
 		}
 
 		ls_command(a, l, files, files_length);
 	}
-
 	return 0;
 }
 
