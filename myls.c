@@ -9,9 +9,14 @@
 #include <stdbool.h>
 #include <string.h>
 
-int ls_command(int a, int l, char *files[], int files_length);
-int directories_handler(int a, int l, char *file);
-int files_handler(int a, int l, char *file);
+int ls_command(bool a, bool l, char *files[], int files_length);
+int directories_handler(bool a, bool l, char *file);
+int files_handler(bool a, bool l, char *file);
+int L_Command_Dir(char *file, bool a, DIR *directory);
+int L_Command_File(char *file, bool a);
+
+//issue on putting in a file as an argument: IF they put the full path, like HELLO/hi.txt, it'll print HELLO/hi.txt when it should only print hi.txt
+
 
 int main(int argc, char *argv[]) {
 
@@ -30,7 +35,6 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	
 	/*
 	 * Collect All the non-option arguments (files and directories) and put them in an array
 	 * for each of them, check if a is true then check if l is true. Then go to the ls function and pass those booleans to it, among other things
@@ -53,8 +57,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	int opt;
-	int a = 0;
-	int l = 0;
+	bool a = false;
+	bool l = false;
 
 	//Condition if myls is ran with no file arguments but has option arugments, puts currentdir inside Directories[]
 	if ((files_length == 0)) {
@@ -66,25 +70,30 @@ int main(int argc, char *argv[]) {
 
 		switch (opt) {
 			case 'a':
-				a = 1;
-
+				a = true;
+				break;
 			case 'l':
-				l = 1;			
+				//printf("L");
+				l = true;
+				break;			
 		}
-
-		ls_command(a, l, files, files_length);
+		//printf("HIIII\n");
+		//ls_command(a, l, files, files_length);
 	}
+	ls_command(a, l, files, files_length);
+
 	return 0;
 }
 
-int ls_command(int a, int l, char *files[], int files_length) {
+int ls_command(bool a, bool l, char *files[], int files_length) {
 
 	for (int i = 0; i < files_length; i++) {
-		printf("FILE BEING LSed: %s", files[i]);
+		//printf("FILE BEING LSed: %s\n", files[i]);
 		struct stat checker;
 		stat(files[i], &checker);
 
 		if (!S_ISREG(checker.st_mode)) { //directory case
+			//printf("DIRECTORIES HANDLER\n");
 			directories_handler(a, l, files[i]);
 		}
 		else {
@@ -96,69 +105,75 @@ int ls_command(int a, int l, char *files[], int files_length) {
 	return 0;
 }
 
-int directories_handler(int a, int l, char *file) {
+int directories_handler(bool a, bool l, char *file) {
 
-	printf("Directory being handled: %s\n", file);
+	//printf("Directory being handled: %s\n", file);
 
 	DIR *directory;
 	struct dirent *dir_element;
-	int num_elements = 0;
+
+	if ((directory = opendir(file)) == NULL) {
+		perror("Could not open directory");
+	}
+	else {
+		if (l == false) {
+			if (a == true) { //-a command
+				while ((dir_element = readdir(directory)) != NULL) {
+					printf("%s	", (dir_element -> d_name));
+				}
+			}
+			else { //No option arguments
+				while ((dir_element = readdir(directory)) != NULL) {
+					if ((dir_element -> d_name)[0] != '.') {
+						printf("%s	", (dir_element -> d_name));
+					}
+				}
+			}
+		}
+		else {
+			//printf("Gotta blast!\n");
+			L_Command_Dir(file, a, directory);
+		}
+	}
+
+	printf("\n");
+
+	return 0;
+}
+
+
+int files_handler(bool a, bool l, char *file) {
+
+			
+	if ((l == true)) {
+		L_Command_File(file, a);
+	}
+	else {
+		printf("%s	\n", file);
+
+	}
+
+	printf("\n");
+
+	return 0;
+}
+
+
+int L_Command_Dir(char *file, bool a, DIR *directory) {
+
+	struct dirent *dir_element;
 	
 	struct passwd *username_access;
 	struct passwd *group_access;
 	struct tm *stattime;
 	char timebuf[80];
 	struct stat *buffer = malloc(sizeof(struct stat));
-	
-	if ((directory = opendir(file)) == NULL) {
-		perror("Could not open directory");
-	}
-	else {
+
+	if (a == true) {
 		while ((dir_element = readdir(directory)) != NULL) {
-			if ((a == 0)) {
-				printf("DIR ELEMENT: %s\n", (dir_element -> d_name));
-				if ((dir_element -> d_name)[0] != '.') {
-					num_elements++;
-				}
-			}
-			else {
-				num_elements++;
-			}
-		}
-	}
+			char *filename = dir_element -> d_name;
+			stat(filename, buffer);
 
-
-
-	printf("GOT ELEMENTS: %d \n", num_elements);
-
-	char *elem_names[num_elements];
-	int counter = 0;
-
-	while ((dir_element = readdir(directory)) != NULL) {
-		if ((a == 0)) {
-			if ((dir_element -> d_name)[0] != '.') {
-				printf("DIR ELEMENT: %s\n", (dir_element -> d_name));
-				strcpy(elem_names[counter], (dir_element -> d_name));
-				counter++;
-			}
-		}
-		else {
-			strcpy(elem_names[counter], (dir_element -> d_name));
-			counter++;
-		}
-	}
-
-	for (int j = 0; j < num_elements; j++) {
-		printf("ELEMENT: %s\n", elem_names[j]);
-	}
-
-
-	for (int i = 0; i < num_elements; i++) {
-		char *filename = elem_names[i];
-		stat(filename, buffer);
-		
-		if ((l == 1)) {
-			printf("HELLO\n");
 			username_access = getpwuid(buffer->st_uid);
 			if (username_access == NULL) {
 				perror("getpwuid");
@@ -192,29 +207,67 @@ int directories_handler(int a, int l, char *file) {
 			username_access->pw_name, group_access->pw_name, 
 			buffer->st_size, timebuf, filename);	
 		}
-		else {
-			printf("%s	", filename);
-		}
-		printf("\n");
+	}
+	else {
+		//printf("A\n");
+		while ((dir_element = readdir(directory)) != NULL) {
+			char *filename = dir_element -> d_name;
+			stat(filename, buffer);
+			
+			username_access = getpwuid(buffer->st_uid);
+			if (username_access == NULL) {
+				perror("getpwuid");
+			}
+			else {}
 
+			group_access = getpwuid(buffer->st_gid);
+			if (group_access == NULL) {
+				perror("getpwuid");
+			}
+			else {}
+
+			stattime = localtime(&buffer->st_ctime);
+			//Lists the directory permissions
+			strftime(timebuf, 80, "%c", stattime);
+			if (filename[0] != '.') {
+				printf((S_ISDIR(buffer->st_mode)) ? "d" : "-");
+				printf((S_IRUSR & (buffer->st_mode)) ? "r" : "-");
+				printf((S_IWUSR & (buffer->st_mode)) ? "w" : "-");
+				printf((S_IXUSR & (buffer->st_mode)) ? "x" : "-");
+				printf((S_IRGRP & (buffer->st_mode)) ? "r" : "-");
+				printf((S_IWGRP & (buffer->st_mode)) ? "w" : "-");
+				printf((S_IXGRP & (buffer->st_mode)) ? "x" : "-");
+				printf((S_IROTH & (buffer->st_mode)) ? "r" : "-");
+				printf((S_IWOTH & (buffer->st_mode)) ? "w" : "-");
+				printf((S_IXOTH & (buffer->st_mode)) ? "x" : "-");
+
+
+				printf("	%lu	%s	%s	%jd	%s	%s\n", 
+				buffer->st_nlink,
+				username_access->pw_name, group_access->pw_name, 
+				buffer->st_size, timebuf, filename);	
+			}
+
+		}
+	
 	}
 
 	return 0;
+
 }
 
+int L_Command_File(char *file, bool a) {
 
-int files_handler(int a, int l, char *file) {
-
-	
 	struct passwd *username_access;
 	struct passwd *group_access;
 	struct tm *stattime;
 	char timebuf[80];
 	struct stat *buffer = malloc(sizeof(struct stat));
+
 	stat(file, buffer);
-		
-	if ((l == 1)) {
-		printf("GOODBYE\n");
+
+	if (a == true) {
+
 		username_access = getpwuid(buffer->st_uid);
 		if (username_access == NULL) {
 			perror("getpwuid");
@@ -249,9 +302,40 @@ int files_handler(int a, int l, char *file) {
 		buffer->st_size, timebuf, file);	
 	}
 	else {
-		printf("%s	", file);
+		username_access = getpwuid(buffer->st_uid);
+		if (username_access == NULL) {
+			perror("getpwuid");
+		}
+		else {}
+
+		group_access = getpwuid(buffer->st_gid);
+		if (group_access == NULL) {
+			perror("getpwuid");
+		}
+		else {}
+
+		stattime = localtime(&buffer->st_ctime);
+		//Lists the directory permissions
+		strftime(timebuf, 80, "%c", stattime);
+		if (file[0] != '.') {
+			printf((S_ISDIR(buffer->st_mode)) ? "d" : "-");
+			printf((S_IRUSR & (buffer->st_mode)) ? "r" : "-");
+			printf((S_IWUSR & (buffer->st_mode)) ? "w" : "-");
+			printf((S_IXUSR & (buffer->st_mode)) ? "x" : "-");
+			printf((S_IRGRP & (buffer->st_mode)) ? "r" : "-");
+			printf((S_IWGRP & (buffer->st_mode)) ? "w" : "-");
+			printf((S_IXGRP & (buffer->st_mode)) ? "x" : "-");
+			printf((S_IROTH & (buffer->st_mode)) ? "r" : "-");
+			printf((S_IWOTH & (buffer->st_mode)) ? "w" : "-");
+			printf((S_IXOTH & (buffer->st_mode)) ? "x" : "-");
+
+
+			printf("	%lu	%s	%s	%jd	%s	%s\n", 
+			buffer->st_nlink,
+			username_access->pw_name, group_access->pw_name, 
+			buffer->st_size, timebuf, file);	
+		}
 	}
-	printf("\n");
 
 	return 0;
 }
