@@ -188,7 +188,7 @@ int L_Command_Dir(char *file, bool a, DIR *directory) {
 
 			stattime = localtime(&buffer->st_ctime);
 			//Lists the directory permissions
-			strftime(timebuf, 80, "%c", stattime);
+			strftime(timebuf, 80, "%b %e %R", stattime);
 
 			printf((S_ISDIR(buffer->st_mode)) ? "d" : "-");
 			printf((S_IRUSR & (buffer->st_mode)) ? "r" : "-");
@@ -228,7 +228,7 @@ int L_Command_Dir(char *file, bool a, DIR *directory) {
 
 			stattime = localtime(&buffer->st_ctime);
 			//Lists the directory permissions
-			strftime(timebuf, 80, "%c", stattime);
+			strftime(timebuf, 80, "%b %e %R", stattime);
 			if (filename[0] != '.') {
 				printf((S_ISDIR(buffer->st_mode)) ? "d" : "-");
 				printf((S_IRUSR & (buffer->st_mode)) ? "r" : "-");
@@ -282,7 +282,7 @@ int L_Command_File(char *file, bool a) {
 
 		stattime = localtime(&buffer->st_ctime);
 		//Lists the directory permissions
-		strftime(timebuf, 80, "%c", stattime);
+		strftime(timebuf, 80, "%b %e %R", stattime);
 
 		printf((S_ISDIR(buffer->st_mode)) ? "d" : "-");
 		printf((S_IRUSR & (buffer->st_mode)) ? "r" : "-");
@@ -316,7 +316,7 @@ int L_Command_File(char *file, bool a) {
 
 		stattime = localtime(&buffer->st_ctime);
 		//Lists the directory permissions
-		strftime(timebuf, 80, "%c", stattime);
+		strftime(timebuf, 80, "%b %e %R", stattime);
 		if (file[0] != '.') {
 			printf((S_ISDIR(buffer->st_mode)) ? "d" : "-");
 			printf((S_IRUSR & (buffer->st_mode)) ? "r" : "-");
