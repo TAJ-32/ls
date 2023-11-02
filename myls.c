@@ -94,6 +94,8 @@ int ls_command(bool a, bool l, char *files[], int files_length) {
 
 		if (!S_ISREG(checker.st_mode)) { //directory case
 			//printf("DIRECTORIES HANDLER\n");
+			//printf ("file 0: %s, file 1: %s, file 2: %s \n", files[0], files[1], files[2]);
+			//chdir(files[0]);
 			directories_handler(a, l, files[i]);
 		}
 		else {
@@ -116,6 +118,7 @@ int directories_handler(bool a, bool l, char *file) {
 		perror("Could not open directory");
 	}
 	else {
+		//printf("The directory after chdir: %s\n ", file);
 		if (l == false) {
 			if (a == true) { //-a command
 				while ((dir_element = readdir(directory)) != NULL) {
@@ -162,17 +165,19 @@ int files_handler(bool a, bool l, char *file) {
 int L_Command_Dir(char *file, bool a, DIR *directory) {
 
 	struct dirent *dir_element;
-	
 	struct passwd *username_access;
 	struct passwd *group_access;
 	struct tm *stattime;
 	char timebuf[80];
 	struct stat *buffer = malloc(sizeof(struct stat));
+	chdir(file);
+	
 
 	if (a == true) {
 		while ((dir_element = readdir(directory)) != NULL) {
 			char *filename = dir_element -> d_name;
 			stat(filename, buffer);
+			//printf("SIZE: %jd", buffer -> st_size);
 
 			username_access = getpwuid(buffer->st_uid);
 			if (username_access == NULL) {
@@ -209,10 +214,17 @@ int L_Command_Dir(char *file, bool a, DIR *directory) {
 		}
 	}
 	else {
-		//printf("A\n");
 		while ((dir_element = readdir(directory)) != NULL) {
+			//char cwd[256];
+			//getcwd(cwd, sizeof(cwd));
+			//printf("the current working directory is: %s ", cwd);
 			char *filename = dir_element -> d_name;
-			stat(filename, buffer);
+			int stat_value = stat(filename, buffer);
+
+			if (stat_value  == -1) {
+				perror("stat");
+				printf("For the file: %s", dir_element -> d_name);
+			}
 			
 			username_access = getpwuid(buffer->st_uid);
 			if (username_access == NULL) {
